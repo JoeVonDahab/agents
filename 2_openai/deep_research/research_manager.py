@@ -10,6 +10,9 @@ from comprehensive_pathophysiology_agent import comprehensive_pathophysiology_ag
 from qsb_modeling_agent import qsb_modeling_agent, BiologicalNetworkModel
 from target_analysis_agent import target_analysis_agent, TargetAnalysisReport
 from prioritization_agent import prioritization_agent, TargetPrioritization
+from drug_miner_agent import drug_miner_agent, DrugMiningReport
+from repurposing_evaluator_agent import repurposing_evaluator_agent, RepurposingEvaluationReport
+from final_recommender_agent import final_recommender_agent, FinalRecommendationReport
 from specialized_research_agents import (
     clinical_research_agent, genetic_research_agent, epidemiological_research_agent,
     pathophysiological_research_agent, omics_research_agent
@@ -129,16 +132,51 @@ class ResearchManager:
         network_model = await self.construct_biological_network(
             comprehensive_pathophysiology_report, disease_report, pharmacology_report
         )
+        # Store for Stage 4
+        self.last_network_model = network_model
         
         yield "Phase B: Analyzing targets and competitive landscape..."
         target_analysis = await self.analyze_targets(network_model)
+        # Store for Stage 4
+        self.last_target_analysis = target_analysis
         
         yield "Phase C: Prioritizing targets based on potential and competition..."
         target_prioritization = await self.prioritize_targets(network_model, target_analysis)
+        # Store for Stage 4
+        self.last_target_prioritization = target_prioritization
         
         yield "Stage 3 complete. Target prioritization ready."
         final_stage3_report = f"{network_model.markdown_report}\n\n---\n\n{target_analysis.markdown_report}\n\n---\n\n{target_prioritization.markdown_report}"
         yield final_stage3_report
+
+    async def run_stage4(self, target_prioritization: TargetPrioritization,
+                         network_model: BiologicalNetworkModel,
+                         target_analysis: TargetAnalysisReport,
+                         disease_report: DiseaseUnderstandingReport,
+                         pharmacology_report: PharmacologyReport,
+                         comprehensive_pathophysiology_report: ComprehensivePathophysiologyReport):
+        """ Run Stage 4: Drug-Target Deep Dive & Final Recommendations"""
+        
+        yield "Starting Stage 4: Drug-Target Deep Dive & Final Recommendations..."
+        
+        yield "Phase A: Mining drugs for priority targets..."
+        drug_mining_report = await self.mine_target_drugs(target_prioritization)
+        
+        yield "Phase B: Evaluating repurposing candidates..."
+        repurposing_evaluation = await self.evaluate_repurposing_candidates(
+            drug_mining_report, target_prioritization, target_analysis
+        )
+        
+        yield "Phase C: Generating final recommendations..."
+        final_recommendations = await self.generate_final_recommendations(
+            repurposing_evaluation, drug_mining_report, target_prioritization,
+            network_model, target_analysis, disease_report, pharmacology_report,
+            comprehensive_pathophysiology_report
+        )
+        
+        yield "Stage 4 complete. Final drug repurposing recommendations ready."
+        final_stage4_report = f"{drug_mining_report.markdown_report}\n\n---\n\n{repurposing_evaluation.markdown_report}\n\n---\n\n{final_recommendations.markdown_report}"
+        yield final_stage4_report
 
     async def run(self, query: str):
         """ Legacy method for backward compatibility - runs only Stage 1"""
@@ -320,3 +358,40 @@ class ResearchManager:
             input_data,
         )
         return result.final_output_as(TargetPrioritization)
+
+    # Stage 4 methods
+    async def mine_target_drugs(self, target_prioritization: TargetPrioritization) -> DrugMiningReport:
+        """ Mine drugs for the highest priority targets """
+        input_data = f"Target Prioritization: {target_prioritization.markdown_report}"
+        result = await Runner.run(
+            drug_miner_agent,
+            input_data,
+        )
+        return result.final_output_as(DrugMiningReport)
+
+    async def evaluate_repurposing_candidates(self, drug_mining_report: DrugMiningReport, 
+                                             target_prioritization: TargetPrioritization,
+                                             target_analysis: TargetAnalysisReport) -> RepurposingEvaluationReport:
+        """ Evaluate potential repurposing candidates from mined drugs """
+        input_data = f"Drug Mining Report: {drug_mining_report.markdown_report}\nTarget Prioritization: {target_prioritization.markdown_report}\nTarget Analysis: {target_analysis.markdown_report}"
+        result = await Runner.run(
+            repurposing_evaluator_agent,
+            input_data,
+        )
+        return result.final_output_as(RepurposingEvaluationReport)
+
+    async def generate_final_recommendations(self, repurposing_evaluation: RepurposingEvaluationReport,
+                                            drug_mining_report: DrugMiningReport,
+                                            target_prioritization: TargetPrioritization,
+                                            network_model: BiologicalNetworkModel,
+                                            target_analysis: TargetAnalysisReport,
+                                            disease_report: DiseaseUnderstandingReport,
+                                            pharmacology_report: PharmacologyReport,
+                                            comprehensive_pathophysiology_report: ComprehensivePathophysiologyReport) -> FinalRecommendationReport:
+        """ Generate final drug repurposing recommendations """
+        input_data = f"Repurposing Evaluation: {repurposing_evaluation.markdown_report}\nDrug Mining Report: {drug_mining_report.markdown_report}\nTarget Prioritization: {target_prioritization.markdown_report}\nNetwork Model: {network_model.markdown_report}\nTarget Analysis: {target_analysis.markdown_report}\nDisease Report: {disease_report.markdown_report}\nPharmacology Report: {pharmacology_report.markdown_report}\nComprehensive Pathophysiology Report: {comprehensive_pathophysiology_report.markdown_report}"
+        result = await Runner.run(
+            final_recommender_agent,
+            input_data,
+        )
+        return result.final_output_as(FinalRecommendationReport)

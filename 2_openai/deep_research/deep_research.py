@@ -39,6 +39,27 @@ async def run_stage2(user_answers: str):
         research_manager.last_pharmacology_report
     ):
         yield chunk
+    
+    # Automatically run Stage 4 after Stage 3 completes
+    yield "\n\n---\n\n# Starting Stage 4: Drug-Target Deep Dive & Final Recommendations\n"
+    yield "Automatically proceeding to Stage 4...\n"
+    
+    # Check if Stage 3 results are available
+    if not hasattr(research_manager, 'last_target_prioritization') or \
+       not hasattr(research_manager, 'last_network_model') or \
+       not hasattr(research_manager, 'last_target_analysis'):
+        yield "Error: Stage 3 results are incomplete. Cannot proceed to Stage 4."
+        return
+    
+    async for chunk in research_manager.run_stage4(
+        research_manager.last_target_prioritization,
+        research_manager.last_network_model,
+        research_manager.last_target_analysis,
+        research_manager.last_disease_report,
+        research_manager.last_pharmacology_report,
+        research_manager.last_comprehensive_pathophysiology_report
+    ):
+        yield chunk
 
 with gr.Blocks(theme=gr.themes.Default(primary_hue="sky")) as ui:
     gr.Markdown("# Drug Repurposing Deep Search Agent")
@@ -55,10 +76,11 @@ with gr.Blocks(theme=gr.themes.Default(primary_hue="sky")) as ui:
         stage1_button.click(fn=run_stage1, inputs=query_textbox, outputs=stage1_report)
         query_textbox.submit(fn=run_stage1, inputs=query_textbox, outputs=stage1_report)
     
-    with gr.Tab("Stage 2 + 3: Comprehensive Analysis & Target Prioritization"):
+    with gr.Tab("Stage 2-4: Complete Analysis & Final Recommendations"):
         gr.Markdown("## Stage 2: Comprehensive Research & Synthesis")
         gr.Markdown("## Stage 3: QSB Modeling & Target Prioritization")
-        gr.Markdown("*Provide detailed answers about the disease to proceed with comprehensive analysis. Stage 3 will run automatically after Stage 2 completes.*")
+        gr.Markdown("## Stage 4: Drug-Target Deep Dive & Final Recommendations")
+        gr.Markdown("*Provide detailed answers about the disease to proceed with comprehensive analysis. Stages 2, 3, and 4 will run automatically in sequence.*")
         gr.Markdown("**You can either:**")
         gr.Markdown("- Answer the questions from Stage 1, OR")
         gr.Markdown("- Provide your own detailed information about the disease including clinical presentation, pathways, genetics, etc.")
@@ -68,8 +90,8 @@ with gr.Blocks(theme=gr.themes.Default(primary_hue="sky")) as ui:
             placeholder="Please provide detailed information about the disease including clinical presentation, pathways, known genetics, epidemiology, etc. You can answer the questions from Stage 1 or provide your own comprehensive information...",
             lines=8
         )
-        stage2_button = gr.Button("Start Comprehensive Analysis (Stages 2 + 3)", variant="primary")
-        stage2_report = gr.Markdown(label="Comprehensive Analysis Results")
+        stage2_button = gr.Button("Start Complete Analysis (Stages 2-4)", variant="primary")
+        stage2_report = gr.Markdown(label="Complete Analysis Results")
         
         stage2_button.click(fn=run_stage2, inputs=user_answers_textbox, outputs=stage2_report)
     
