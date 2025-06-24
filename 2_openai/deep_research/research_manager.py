@@ -1,6 +1,6 @@
 from agents import Runner, trace, gen_trace_id
 from search_agent import search_agent
-from prompter_agent import prompter_agent
+from prompter_agent import prompter_agent, SearchPlan
 from evaluator_agent import question_generator_agent, RationaleAndQuestions
 from reporter_agent import reporter_agent
 import asyncio
@@ -33,19 +33,17 @@ class ResearchManager:
             prompter_agent,
             query,
         )
-        return result.final_output
+        search_plan = result.final_output_as(SearchPlan)
+        return search_plan.search_queries
 
     async def perform_searches(self, search_queries: list[str]) -> list[str]:
         """ Perform the searches to perform for the query """
-        num_completed = 0
-        tasks = [asyncio.create_task(self.search(query)) for query in search_queries]
         results = []
-        for task in asyncio.as_completed(tasks):
-            result = await task
+        for i, query in enumerate(search_queries):
+            result = await self.search(query)
             if result is not None:
                 results.append(result)
-            num_completed += 1
-            print(f"Searching... {num_completed}/{len(tasks)} completed")
+            print(f"Searching... {i+1}/{len(search_queries)} completed")
         print("Finished searching")
         return results
 
