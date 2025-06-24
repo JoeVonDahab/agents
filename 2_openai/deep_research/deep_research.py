@@ -72,6 +72,19 @@ with gr.Blocks(theme=gr.themes.Default(primary_hue="sky")) as ui:
         stage2_report = gr.Markdown(label="Comprehensive Analysis Results")
         
         stage2_button.click(fn=run_stage2, inputs=user_answers_textbox, outputs=stage2_report)
+    
+    # Developer signature at the bottom
+    gr.Markdown("""
+    <div style="text-align: center; font-size: 13px; color: #666; margin-top: 30px; padding: 10px;">
+    <hr>
+    <em>
+    By: <strong>Youssef Abo-Dahab, Pharm.D</strong><br> 
+    M.S Candidate, AI & Computational Drug Discovery<br>
+    Zhao Lab, Bioengineering and Therapeutic Sciences Department, UCSF<br>
+    youssef.abo-dahab@ucsf.edu
+    </em>
+    </div>
+    """)
 
 ui.launch(inbrowser=True)
 
