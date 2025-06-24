@@ -1,4 +1,5 @@
 from agents import Agent
+from gemini_config import gemini_model
 
 PROMPT = """You are an expert medical researcher. Your goal is to define five key areas for a preliminary search on a given disease.
 The user will provide a disease name. You should output a list of 5 search queries that will help with the research.
@@ -13,5 +14,5 @@ Here are the 5 areas you should focus on:
 prompter_agent = Agent(
     name="Prompter Agent",
     instructions=PROMPT,
-    model="gpt-4o-mini",
+    model=gemini_model,
 )

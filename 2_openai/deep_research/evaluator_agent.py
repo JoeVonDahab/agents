@@ -1,5 +1,6 @@
 from agents import Agent
 from pydantic import BaseModel, Field
+from gemini_config import gemini_model
 
 class RationaleAndQuestions(BaseModel):
     rationales: list[str] = Field(description="List of 5 rationales for the questions that need to be answered.")
@@ -19,6 +20,6 @@ Output the rationales and the questions.
 question_generator_agent = Agent(
     name="Question Generator Agent",
     instructions=PROMPT,
-    model="gpt-4o-mini",
+    model=gemini_model,
     output_type=RationaleAndQuestions,
 )

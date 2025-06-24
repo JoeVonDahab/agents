@@ -37,11 +37,16 @@ class ResearchManager:
 
     async def perform_searches(self, search_queries: list[str]) -> list[str]:
         """ Perform the searches to perform for the query """
+        num_completed = 0
+        tasks = [asyncio.create_task(self.search(query)) for query in search_queries]
         results = []
-        for query in search_queries:
-            result = await self.search(query)
+        for task in asyncio.as_completed(tasks):
+            result = await task
             if result is not None:
                 results.append(result)
+            num_completed += 1
+            print(f"Searching... {num_completed}/{len(tasks)} completed")
+        print("Finished searching")
         return results
 
     async def search(self, query: str) -> str | None:
