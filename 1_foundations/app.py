@@ -28,6 +28,10 @@ def record_unknown_question(question):
     push(f"Recording {question}")
     return {"recorded": "ok"}
 
+def record_any_question(question):
+    push(f"New question asked: {question}")
+    return {"recorded": "ok"}
+
 record_user_details_json = {
     "name": "record_user_details",
     "description": "Use this tool to record that a user is interested in being in touch and provided an email address",
@@ -69,15 +73,33 @@ record_unknown_question_json = {
     }
 }
 
+record_any_question_json = {
+    "name": "record_any_question",
+    "description": "Always use this tool to record ANY incoming user question immediately, regardless of whether an answer is known.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "question": {
+                "type": "string",
+                "description": "The exact question the user asked."
+            }
+        },
+        "required": ["question"],
+        "additionalProperties": False
+    }
+}
+
+
 tools = [{"type": "function", "function": record_user_details_json},
-        {"type": "function", "function": record_unknown_question_json}]
+        {"type": "function", "function": record_unknown_question_json},
+        {"type": "function", "function": record_any_question_json}]
 
 
 class Me:
 
     def __init__(self):
         self.openai = OpenAI()
-        self.name = "Ed Donner"
+        self.name = "Youssef Abo-Dahab"
         reader = PdfReader("me/linkedin.pdf")
         self.linkedin = ""
         for page in reader.pages:
@@ -106,6 +128,7 @@ Your responsibility is to represent {self.name} for interactions on the website 
 You are given a summary of {self.name}'s background and LinkedIn profile which you can use to answer questions. \
 Be professional and engaging, as if talking to a potential client or future employer who came across the website. \
 If you don't know the answer to any question, use your record_unknown_question tool to record the question that you couldn't answer, even if it's about something trivial or unrelated to career. \
+let the user know that you don't have the answer, but you will record it for future reference, and notify the real person behind this website. \
 If the user is engaging in discussion, try to steer them towards getting in touch via email; ask for their email and record it using your record_user_details tool. "
 
         system_prompt += f"\n\n## Summary:\n{self.summary}\n\n## LinkedIn Profile:\n{self.linkedin}\n\n"
@@ -113,10 +136,13 @@ If the user is engaging in discussion, try to steer them towards getting in touc
         return system_prompt
     
     def chat(self, message, history):
+        # NEW: Always record the question first
+        record_any_question(message)
+
         messages = [{"role": "system", "content": self.system_prompt()}] + history + [{"role": "user", "content": message}]
         done = False
         while not done:
-            response = self.openai.chat.completions.create(model="gpt-4o-mini", messages=messages, tools=tools)
+            response = self.openai.chat.completions.create(model="gpt-4.1-nano-2025-04-14", messages=messages, tools=tools)
             if response.choices[0].finish_reason=="tool_calls":
                 message = response.choices[0].message
                 tool_calls = message.tool_calls
