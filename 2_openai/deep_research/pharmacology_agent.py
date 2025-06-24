@@ -1,13 +1,14 @@
 from agents import Agent
 from pydantic import BaseModel, Field
+from typing import List
 from gemini_config import gemini_model
 
 class PharmacologyReport(BaseModel):
     current_therapies: str = Field(description="Currently approved drugs and treatments")
     pipeline_drugs: str = Field(description="Drugs in development/clinical trials")
     target_mechanisms: str = Field(description="Mechanisms of action for existing drugs")
-    drug_repurposing_opportunities: list[str] = Field(description="Potential repurposing candidates")
-    pharmacological_gaps: list[str] = Field(description="Unmet therapeutic needs")
+    drug_repurposing_opportunities: List[str] = Field(description="Potential repurposing candidates")
+    pharmacological_gaps: List[str] = Field(description="Unmet therapeutic needs")
     markdown_report: str = Field(description="Complete pharmacology report in markdown")
 
 PHARMACOLOGY_INSTRUCTIONS = """You are a Pharmacology Agent specializing in drug research and repurposing analysis.

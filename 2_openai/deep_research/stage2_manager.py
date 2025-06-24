@@ -1,16 +1,17 @@
 from agents import Agent, Runner
 from pydantic import BaseModel, Field
+from typing import List
 from gemini_config import gemini_model
 import asyncio
 
 class Stage2ResearchPlan(BaseModel):
-    clinical_queries: list[str] = Field(description="Clinical research queries (symptoms, progression)")
-    genetic_queries: list[str] = Field(description="Genetic research queries (mutations, risk genes)")
-    epidemiological_queries: list[str] = Field(description="Epidemiological queries (prevalence, risk factors)")
-    omics_queries: list[str] = Field(description="Omics queries (genomics, proteomics data)")
+    clinical_queries: List[str] = Field(description="Clinical research queries (symptoms, progression)")
+    genetic_queries: List[str] = Field(description="Genetic research queries (mutations, risk genes)")
+    epidemiological_queries: List[str] = Field(description="Epidemiological queries (prevalence, risk factors)")
+    omics_queries: List[str] = Field(description="Omics queries (genomics, proteomics data)")
 
 class PathophysiologyResearchPlan(BaseModel):
-    pathophysiological_queries: list[str] = Field(description="Advanced pathophysiological queries based on disease and drug understanding")
+    pathophysiological_queries: List[str] = Field(description="Advanced pathophysiological queries based on disease and drug understanding")
 
 STAGE2_MANAGER_INSTRUCTIONS = """You are a Stage 2 Research Manager for drug repurposing research. 
 Based on the user's answers to initial questions and preliminary findings, you need to create a comprehensive research plan.

@@ -1,5 +1,6 @@
 from agents import Agent
 from pydantic import BaseModel, Field
+from typing import List
 from gemini_config import gemini_model
 
 class DiseaseUnderstandingReport(BaseModel):
@@ -8,7 +9,7 @@ class DiseaseUnderstandingReport(BaseModel):
     genetic_landscape: str = Field(description="Genetic factors and mutations")
     epidemiological_context: str = Field(description="Population-level insights")
     omics_insights: str = Field(description="Genomics, proteomics findings")
-    key_biological_factors: list[str] = Field(description="Key biological factors identified")
+    key_biological_factors: List[str] = Field(description="Key biological factors identified")
     markdown_report: str = Field(description="Complete disease understanding report in markdown")
 
 DISEASE_SYNTHESIS_INSTRUCTIONS = """You are a Disease Understanding Synthesis Agent specializing in foundational disease analysis.

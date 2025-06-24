@@ -1,5 +1,6 @@
 from agents import Agent
 from pydantic import BaseModel, Field
+from typing import List
 from gemini_config import gemini_model
 
 class ComprehensivePathophysiologyReport(BaseModel):
@@ -9,8 +10,8 @@ class ComprehensivePathophysiologyReport(BaseModel):
     metabolic_disruptions: str = Field(description="Metabolic changes and disruptions")
     tissue_pathology: str = Field(description="Tissue and organ-level pathological changes")
     drug_pathway_interactions: str = Field(description="How current drugs interact with disease pathways")
-    repurposing_targets: list[str] = Field(description="Identified targets for drug repurposing")
-    intervention_points: list[str] = Field(description="Potential intervention points in pathways")
+    repurposing_targets: List[str] = Field(description="Identified targets for drug repurposing")
+    intervention_points: List[str] = Field(description="Potential intervention points in pathways")
     markdown_report: str = Field(description="Complete comprehensive pathophysiology report in markdown")
 
 COMPREHENSIVE_PATHOPHYSIOLOGY_INSTRUCTIONS = """You are a Comprehensive Pathophysiology Agent specializing in integrative molecular mechanism analysis for drug repurposing.

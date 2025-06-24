@@ -3,13 +3,12 @@ gradio>=4.0.0
 python-dotenv
 pydantic>=2.0.0
 openai>=1.0.0
+google-generativeai>=0.3.0
 duckduckgo-search
 sendgrid
 requests
-python-dotenv
-gradio
 pypdf
-openai
 openai-agents
+
 # Note: The 'agents' library appears to be a custom library
 # You may need to include it in your project or install from a specific source

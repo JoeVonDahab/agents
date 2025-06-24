@@ -7,6 +7,9 @@ from stage2_manager import stage2_manager, Stage2ResearchPlan, pathophysiology_m
 from disease_synthesis_agent import disease_synthesis_agent, DiseaseUnderstandingReport
 from pharmacology_agent import pharmacology_agent, PharmacologyReport
 from comprehensive_pathophysiology_agent import comprehensive_pathophysiology_agent, ComprehensivePathophysiologyReport
+from qsb_modeling_agent import qsb_modeling_agent, BiologicalNetworkModel
+from target_analysis_agent import target_analysis_agent, TargetAnalysisReport
+from prioritization_agent import prioritization_agent, TargetPrioritization
 from specialized_research_agents import (
     clinical_research_agent, genetic_research_agent, epidemiological_research_agent,
     pathophysiological_research_agent, omics_research_agent
@@ -58,19 +61,33 @@ class ResearchManager:
 
     async def run_stage2(self, user_answers: str):
         """ Run Stage 2: Comprehensive Research & Synthesis with user answers"""
-        if not hasattr(self, 'stage1_search_results'):
-            yield "Error: Stage 1 must be completed before Stage 2"
-            return
-            
         # Guardrail: Validate user answers input
         if not user_answers or not user_answers.strip():
-            yield "Error: Please provide answers to the questions from Stage 1 before proceeding with comprehensive analysis."
+            yield "Error: Please provide answers to the questions before proceeding with comprehensive analysis."
             return
             
         user_answers = user_answers.strip()
         if len(user_answers) < 10:
             yield "Error: Please provide more detailed answers to the questions (at least 10 characters)."
             return
+            
+        # If Stage 1 wasn't run, we need to extract disease name from user answers
+        if not hasattr(self, 'original_query'):
+            # Try to extract disease name from user answers
+            lines = user_answers.split('\n')
+            disease_candidates = []
+            for line in lines:
+                if any(keyword in line.lower() for keyword in ['disease', 'syndrome', 'disorder', 'cancer', 'diabetes', 'parkinson', 'alzheimer']):
+                    disease_candidates.append(line.strip())
+            
+            if disease_candidates:
+                # Use the first likely disease mention as the query
+                self.original_query = disease_candidates[0]
+                # Create minimal search results for Stage 2 planning
+                self.stage1_search_results = [f"User provided information about {self.original_query}: {user_answers}"]
+            else:
+                yield "Error: Could not identify the disease being researched. Please include the disease name in your answers."
+                return
             
         yield "Starting comprehensive research phase..."
         stage2_plan = await self.create_stage2_plan(self.original_query, user_answers, self.stage1_search_results)
@@ -80,9 +97,13 @@ class ResearchManager:
         
         yield "Synthesizing disease understanding report..."
         disease_report = await self.synthesize_disease_understanding(disease_research_results)
+        # Store for Stage 3
+        self.last_disease_report = disease_report
         
         yield "Phase B: Pharmacology - Analyzing therapeutic landscape..."
         pharmacology_report = await self.analyze_pharmacology(disease_report)
+        # Store for Stage 3
+        self.last_pharmacology_report = pharmacology_report
         
         yield "Phase C: Comprehensive Pathophysiology - Integrating disease and drug knowledge..."
         pathophysiology_plan = await self.create_pathophysiology_plan(disease_report, pharmacology_report)
@@ -90,10 +111,34 @@ class ResearchManager:
         comprehensive_pathophysiology_report = await self.synthesize_comprehensive_pathophysiology(
             disease_report, pharmacology_report, pathophysiology_research
         )
+        # Store for Stage 3
+        self.last_comprehensive_pathophysiology_report = comprehensive_pathophysiology_report
         
         yield "Stage 2 complete. Comprehensive analysis ready."
         final_report = f"{disease_report.markdown_report}\n\n---\n\n{pharmacology_report.markdown_report}\n\n---\n\n{comprehensive_pathophysiology_report.markdown_report}"
         yield final_report
+
+    async def run_stage3(self, comprehensive_pathophysiology_report: ComprehensivePathophysiologyReport,
+                         disease_report: DiseaseUnderstandingReport, 
+                         pharmacology_report: PharmacologyReport):
+        """ Run Stage 3: QSB Modeling & Target Prioritization"""
+        
+        yield "Starting Stage 3: QSB Modeling & Target Prioritization..."
+        
+        yield "Phase A: Constructing biological network model..."
+        network_model = await self.construct_biological_network(
+            comprehensive_pathophysiology_report, disease_report, pharmacology_report
+        )
+        
+        yield "Phase B: Analyzing targets and competitive landscape..."
+        target_analysis = await self.analyze_targets(network_model)
+        
+        yield "Phase C: Prioritizing targets based on potential and competition..."
+        target_prioritization = await self.prioritize_targets(network_model, target_analysis)
+        
+        yield "Stage 3 complete. Target prioritization ready."
+        final_stage3_report = f"{network_model.markdown_report}\n\n---\n\n{target_analysis.markdown_report}\n\n---\n\n{target_prioritization.markdown_report}"
+        yield final_stage3_report
 
     async def run(self, query: str):
         """ Legacy method for backward compatibility - runs only Stage 1"""
@@ -234,3 +279,44 @@ class ResearchManager:
             input_data,
         )
         return result.final_output_as(ComprehensivePathophysiologyReport)
+
+    # Stage 3 methods
+    async def construct_biological_network(self, pathophysiology_report: ComprehensivePathophysiologyReport,
+                                         disease_report: DiseaseUnderstandingReport,
+                                         pharmacology_report: PharmacologyReport) -> BiologicalNetworkModel:
+        """ Construct QSB biological network model from all prior information """
+        input_data = f"Pathophysiology: {pathophysiology_report.markdown_report}\nDisease Understanding: {disease_report.markdown_report}\nPharmacology: {pharmacology_report.markdown_report}"
+        result = await Runner.run(
+            qsb_modeling_agent,
+            input_data,
+        )
+        return result.final_output_as(BiologicalNetworkModel)
+
+    async def analyze_targets(self, network_model: BiologicalNetworkModel) -> TargetAnalysisReport:
+        """ Analyze each potential target for drugs tested, network effects, and dependencies """
+        input_data = f"Network Model: {network_model.markdown_report}\nPotential Targets: {network_model.potential_targets}"
+        
+        # Conduct additional searches for each target to fill information gaps
+        target_search_results = []
+        for target in network_model.potential_targets[:5]:  # Limit to top 5 targets to avoid rate limits
+            search_query = f"{target} drug target clinical trials drugs tested mechanism network effects"
+            search_result = await self.search(search_query)
+            if search_result:
+                target_search_results.append(f"Target {target}: {search_result}")
+        
+        enhanced_input = f"{input_data}\nAdditional Target Research: {target_search_results}"
+        result = await Runner.run(
+            target_analysis_agent,
+            enhanced_input,
+        )
+        return result.final_output_as(TargetAnalysisReport)
+
+    async def prioritize_targets(self, network_model: BiologicalNetworkModel, 
+                               target_analysis: TargetAnalysisReport) -> TargetPrioritization:
+        """ Prioritize targets based on potential and competition analysis """
+        input_data = f"Network Model: {network_model.markdown_report}\nTarget Analysis: {target_analysis.markdown_report}"
+        result = await Runner.run(
+            prioritization_agent,
+            input_data,
+        )
+        return result.final_output_as(TargetPrioritization)
