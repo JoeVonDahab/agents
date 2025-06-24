@@ -1,8 +1,8 @@
 from agents import Runner, trace, gen_trace_id
 from search_agent import search_agent
-from planner_agent import planner_agent, WebSearchItem, WebSearchPlan
-from writer_agent import writer_agent, ReportData
-from email_agent import email_agent
+from prompter_agent import prompter_agent
+from evaluator_agent import question_generator_agent, RationaleAndQuestions
+from reporter_agent import reporter_agent
 import asyncio
 
 class ResearchManager:
@@ -11,74 +11,63 @@ class ResearchManager:
         """ Run the deep research process, yielding the status updates and the final report"""
         trace_id = gen_trace_id()
         with trace("Research trace", trace_id=trace_id):
-            print(f"View trace: https://platform.openai.com/traces/trace?trace_id={trace_id}")
             yield f"View trace: https://platform.openai.com/traces/trace?trace_id={trace_id}"
-            print("Starting research...")
-            search_plan = await self.plan_searches(query)
-            yield "Searches planned, starting to search..."     
-            search_results = await self.perform_searches(search_plan)
-            yield "Searches complete, writing report..."
-            report = await self.write_report(query, search_results)
-            yield "Report written, sending email..."
-            await self.send_email(report)
-            yield "Email sent, research complete"
-            yield report.markdown_report
-        
+            
+            yield "Defining search areas..."
+            search_queries = await self.define_search_areas(query)
+            
+            yield "Performing preliminary search..."
+            search_results = await self.perform_searches(search_queries)
+            
+            yield "Generating questions for user..."
+            rationales_and_questions = await self.generate_questions(search_results)
+            
+            yield "Presenting questions to user..."
+            report = await self.present_questions(rationales_and_questions.questions)
 
-    async def plan_searches(self, query: str) -> WebSearchPlan:
-        """ Plan the searches to perform for the query """
-        print("Planning searches...")
+            yield report
+
+    async def define_search_areas(self, query: str) -> list[str]:
+        """ Define the five key areas for a preliminary search on a given disease """
         result = await Runner.run(
-            planner_agent,
-            f"Query: {query}",
+            prompter_agent,
+            query,
         )
-        print(f"Will perform {len(result.final_output.searches)} searches")
-        return result.final_output_as(WebSearchPlan)
+        return result.final_output
 
-    async def perform_searches(self, search_plan: WebSearchPlan) -> list[str]:
+    async def perform_searches(self, search_queries: list[str]) -> list[str]:
         """ Perform the searches to perform for the query """
-        print("Searching...")
-        num_completed = 0
-        tasks = [asyncio.create_task(self.search(item)) for item in search_plan.searches]
+        tasks = [asyncio.create_task(self.search(query)) for query in search_queries]
         results = []
         for task in asyncio.as_completed(tasks):
             result = await task
             if result is not None:
                 results.append(result)
-            num_completed += 1
-            print(f"Searching... {num_completed}/{len(tasks)} completed")
-        print("Finished searching")
         return results
 
-    async def search(self, item: WebSearchItem) -> str | None:
+    async def search(self, query: str) -> str | None:
         """ Perform a search for the query """
-        input = f"Search term: {item.query}\nReason for searching: {item.reason}"
         try:
             result = await Runner.run(
                 search_agent,
-                input,
+                query,
             )
             return str(result.final_output)
         except Exception:
             return None
 
-    async def write_report(self, query: str, search_results: list[str]) -> ReportData:
-        """ Write the report for the query """
-        print("Thinking about report...")
-        input = f"Original query: {query}\nSummarized search results: {search_results}"
+    async def generate_questions(self, search_results: list[str]) -> RationaleAndQuestions:
+        """ Generate rationales and questions based on search results """
         result = await Runner.run(
-            writer_agent,
-            input,
+            question_generator_agent,
+            str(search_results),
         )
+        return result.final_output_as(RationaleAndQuestions)
 
-        print("Finished writing report")
-        return result.final_output_as(ReportData)
-    
-    async def send_email(self, report: ReportData) -> None:
-        print("Writing email...")
+    async def present_questions(self, questions: list[str]) -> str:
+        """ Present questions to the user """
         result = await Runner.run(
-            email_agent,
-            report.markdown_report,
+            reporter_agent,
+            str(questions),
         )
-        print("Email sent")
-        return report
+        return result.final_output
