@@ -1,6 +1,6 @@
 from agents import Agent
 from pydantic import BaseModel, Field
-from gemini_config import default_model
+from gemini_config import gemini_model
 
 class SearchPlan(BaseModel):
     search_queries: list[str] = Field(description="Exactly 5 search queries for the disease research", max_length=5)
@@ -20,6 +20,6 @@ Return exactly 5 search queries, one for each area above.
 prompter_agent = Agent(
     name="Prompter Agent",
     instructions=PROMPT,
-    model=default_model,
+    model=gemini_model,
     output_type=SearchPlan,
 )

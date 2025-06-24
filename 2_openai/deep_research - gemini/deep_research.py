@@ -19,15 +19,8 @@ async def run_stage2(user_answers: str):
         research_manager = ResearchManager()
     
     # Run Stage 2
-    stage2_complete = False
     async for chunk in research_manager.run_stage2(user_answers):
         yield chunk
-        if "Stage 2 complete" in chunk:
-            stage2_complete = True
-    
-    if not stage2_complete:
-        yield "Error: Stage 2 did not complete successfully. Cannot proceed to Stage 3."
-        return
     
     # Automatically run Stage 3 after Stage 2 completes
     yield "\n\n---\n\n# Starting Stage 3: QSB Modeling & Target Prioritization\n"
@@ -40,34 +33,12 @@ async def run_stage2(user_answers: str):
         yield "Error: Stage 2 results are incomplete. Cannot proceed to Stage 3."
         return
     
-    # Validate reports have content
-    try:
-        if not research_manager.last_comprehensive_pathophysiology_report.markdown_report:
-            yield "Error: Comprehensive pathophysiology report is empty. Cannot proceed to Stage 3."
-            return
-        if not research_manager.last_disease_report.markdown_report:
-            yield "Error: Disease report is empty. Cannot proceed to Stage 3."
-            return
-        if not research_manager.last_pharmacology_report.markdown_report:
-            yield "Error: Pharmacology report is empty. Cannot proceed to Stage 3."
-            return
-    except AttributeError as e:
-        yield f"Error: Report validation failed: {str(e)}. Cannot proceed to Stage 3."
-        return
-    
-    stage3_complete = False
     async for chunk in research_manager.run_stage3(
         research_manager.last_comprehensive_pathophysiology_report,
         research_manager.last_disease_report,
         research_manager.last_pharmacology_report
     ):
         yield chunk
-        if "Stage 3 complete" in chunk:
-            stage3_complete = True
-    
-    if not stage3_complete:
-        yield "Error: Stage 3 did not complete successfully. Cannot proceed to Stage 4."
-        return
     
     # Automatically run Stage 4 after Stage 3 completes
     yield "\n\n---\n\n# Starting Stage 4: Drug-Target Deep Dive & Final Recommendations\n"
@@ -78,21 +49,6 @@ async def run_stage2(user_answers: str):
        not hasattr(research_manager, 'last_network_model') or \
        not hasattr(research_manager, 'last_target_analysis'):
         yield "Error: Stage 3 results are incomplete. Cannot proceed to Stage 4."
-        return
-    
-    # Validate Stage 3 reports have content
-    try:
-        if not research_manager.last_target_prioritization.markdown_report:
-            yield "Error: Target prioritization report is empty. Cannot proceed to Stage 4."
-            return
-        if not research_manager.last_network_model.markdown_report:
-            yield "Error: Network model report is empty. Cannot proceed to Stage 4."
-            return
-        if not research_manager.last_target_analysis.markdown_report:
-            yield "Error: Target analysis report is empty. Cannot proceed to Stage 4."
-            return
-    except AttributeError as e:
-        yield f"Error: Stage 3 report validation failed: {str(e)}. Cannot proceed to Stage 4."
         return
     
     async for chunk in research_manager.run_stage4(

@@ -1,5 +1,5 @@
 from agents import Agent
-from gemini_config import default_model
+from gemini_config import gemini_model
 
 # Clinical Research Agent
 CLINICAL_INSTRUCTIONS = """You are a Clinical Research Agent specializing in disease symptoms, progression, and clinical manifestations.
@@ -15,7 +15,7 @@ Provide concise, evidence-based summaries focused on clinical aspects."""
 clinical_research_agent = Agent(
     name="Clinical Research Agent",
     instructions=CLINICAL_INSTRUCTIONS,
-    model=default_model,
+    model=gemini_model,
 )
 
 # Genetic Research Agent  
@@ -32,7 +32,7 @@ Provide concise, evidence-based summaries focused on genetic aspects."""
 genetic_research_agent = Agent(
     name="Genetic Research Agent",
     instructions=GENETIC_INSTRUCTIONS,
-    model=default_model,
+    model=gemini_model,
 )
 
 # Epidemiological Research Agent
@@ -49,7 +49,7 @@ Provide concise, evidence-based summaries focused on epidemiological aspects."""
 epidemiological_research_agent = Agent(
     name="Epidemiological Research Agent", 
     instructions=EPIDEMIOLOGICAL_INSTRUCTIONS,
-    model=default_model,
+    model=gemini_model,
 )
 
 # Pathophysiological Research Agent
@@ -66,7 +66,7 @@ Provide concise, evidence-based summaries focused on pathophysiological mechanis
 pathophysiological_research_agent = Agent(
     name="Pathophysiological Research Agent",
     instructions=PATHOPHYSIOLOGICAL_INSTRUCTIONS, 
-    model=default_model,
+    model=gemini_model,
 )
 
 # Omics Research Agent
@@ -83,5 +83,5 @@ Provide concise, evidence-based summaries focused on omics insights."""
 omics_research_agent = Agent(
     name="Omics Research Agent",
     instructions=OMICS_INSTRUCTIONS,
-    model=default_model,
+    model=gemini_model,
 )

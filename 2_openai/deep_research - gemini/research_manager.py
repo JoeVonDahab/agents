@@ -100,25 +100,11 @@ class ResearchManager:
         
         yield "Synthesizing disease understanding report..."
         disease_report = await self.synthesize_disease_understanding(disease_research_results)
-        # Validate report was generated properly
-        if not disease_report or not hasattr(disease_report, 'markdown_report') or not disease_report.markdown_report:
-            yield f"Error: Failed to generate disease understanding report. Report exists: {disease_report is not None}"
-            if disease_report:
-                yield f"Debug: Report has markdown_report attr: {hasattr(disease_report, 'markdown_report')}"
-                if hasattr(disease_report, 'markdown_report'):
-                    yield f"Debug: markdown_report length: {len(disease_report.markdown_report) if disease_report.markdown_report else 0}"
-            return
         # Store for Stage 3
         self.last_disease_report = disease_report
-        yield f"✅ Disease report generated successfully ({len(disease_report.markdown_report)} characters)"
-        yield f"📊 Disease report preview: {disease_report.markdown_report[:200]}..."
         
         yield "Phase B: Pharmacology - Analyzing therapeutic landscape..."
         pharmacology_report = await self.analyze_pharmacology(disease_report)
-        # Validate report was generated properly
-        if not pharmacology_report or not hasattr(pharmacology_report, 'markdown_report') or not pharmacology_report.markdown_report:
-            yield "Error: Failed to generate pharmacology report."
-            return
         # Store for Stage 3
         self.last_pharmacology_report = pharmacology_report
         
@@ -128,34 +114,11 @@ class ResearchManager:
         comprehensive_pathophysiology_report = await self.synthesize_comprehensive_pathophysiology(
             disease_report, pharmacology_report, pathophysiology_research
         )
-        # Validate report was generated properly
-        if not comprehensive_pathophysiology_report or not hasattr(comprehensive_pathophysiology_report, 'markdown_report') or not comprehensive_pathophysiology_report.markdown_report:
-            yield "Error: Failed to generate comprehensive pathophysiology report."
-            return
         # Store for Stage 3
         self.last_comprehensive_pathophysiology_report = comprehensive_pathophysiology_report
         
         yield "Stage 2 complete. Comprehensive analysis ready."
-        
-        # Build final report with all available content  
-        report_sections = []
-        
-        if disease_report and hasattr(disease_report, 'markdown_report') and disease_report.markdown_report:
-            report_sections.append(f"# Disease Understanding Report\n\n{disease_report.markdown_report}")
-        else:
-            report_sections.append("# Disease Understanding Report\n\n*Report generation failed or content empty*")
-            
-        if pharmacology_report and hasattr(pharmacology_report, 'markdown_report') and pharmacology_report.markdown_report:
-            report_sections.append(f"# Pharmacology Report\n\n{pharmacology_report.markdown_report}")
-        else:
-            report_sections.append("# Pharmacology Report\n\n*Report generation failed or content empty*")
-            
-        if comprehensive_pathophysiology_report and hasattr(comprehensive_pathophysiology_report, 'markdown_report') and comprehensive_pathophysiology_report.markdown_report:
-            report_sections.append(f"# Comprehensive Pathophysiology Report\n\n{comprehensive_pathophysiology_report.markdown_report}")
-        else:
-            report_sections.append("# Comprehensive Pathophysiology Report\n\n*Report generation failed or content empty*")
-        
-        final_report = "\n\n---\n\n".join(report_sections)
+        final_report = f"{disease_report.markdown_report}\n\n---\n\n{pharmacology_report.markdown_report}\n\n---\n\n{comprehensive_pathophysiology_report.markdown_report}"
         yield final_report
 
     async def run_stage3(self, comprehensive_pathophysiology_report: ComprehensivePathophysiologyReport,
@@ -169,52 +132,21 @@ class ResearchManager:
         network_model = await self.construct_biological_network(
             comprehensive_pathophysiology_report, disease_report, pharmacology_report
         )
-        # Validate report was generated properly
-        if not network_model or not hasattr(network_model, 'markdown_report') or not network_model.markdown_report:
-            yield "Error: Failed to generate biological network model."
-            return
         # Store for Stage 4
         self.last_network_model = network_model
         
         yield "Phase B: Analyzing targets and competitive landscape..."
         target_analysis = await self.analyze_targets(network_model)
-        # Validate report was generated properly
-        if not target_analysis or not hasattr(target_analysis, 'markdown_report') or not target_analysis.markdown_report:
-            yield "Error: Failed to generate target analysis report."
-            return
         # Store for Stage 4
         self.last_target_analysis = target_analysis
         
         yield "Phase C: Prioritizing targets based on potential and competition..."
         target_prioritization = await self.prioritize_targets(network_model, target_analysis)
-        # Validate report was generated properly
-        if not target_prioritization or not hasattr(target_prioritization, 'markdown_report') or not target_prioritization.markdown_report:
-            yield "Error: Failed to generate target prioritization report."
-            return
         # Store for Stage 4
         self.last_target_prioritization = target_prioritization
         
         yield "Stage 3 complete. Target prioritization ready."
-        
-        # Build final report with all available content
-        report_sections = []
-        
-        if network_model and hasattr(network_model, 'markdown_report') and network_model.markdown_report:
-            report_sections.append(f"# Biological Network Model\n\n{network_model.markdown_report}")
-        else:
-            report_sections.append("# Biological Network Model\n\n*Report generation failed or content empty*")
-            
-        if target_analysis and hasattr(target_analysis, 'markdown_report') and target_analysis.markdown_report:
-            report_sections.append(f"# Target Analysis Report\n\n{target_analysis.markdown_report}")
-        else:
-            report_sections.append("# Target Analysis Report\n\n*Report generation failed or content empty*")
-            
-        if target_prioritization and hasattr(target_prioritization, 'markdown_report') and target_prioritization.markdown_report:
-            report_sections.append(f"# Target Prioritization\n\n{target_prioritization.markdown_report}")
-        else:
-            report_sections.append("# Target Prioritization\n\n*Report generation failed or content empty*")
-        
-        final_stage3_report = "\n\n---\n\n".join(report_sections)
+        final_stage3_report = f"{network_model.markdown_report}\n\n---\n\n{target_analysis.markdown_report}\n\n---\n\n{target_prioritization.markdown_report}"
         yield final_stage3_report
 
     async def run_stage4(self, target_prioritization: TargetPrioritization,
@@ -229,19 +161,11 @@ class ResearchManager:
         
         yield "Phase A: Mining drugs for priority targets..."
         drug_mining_report = await self.mine_target_drugs(target_prioritization)
-        # Validate report was generated properly
-        if not drug_mining_report or not hasattr(drug_mining_report, 'markdown_report') or not drug_mining_report.markdown_report:
-            yield "Error: Failed to generate drug mining report."
-            return
         
         yield "Phase B: Evaluating repurposing candidates..."
         repurposing_evaluation = await self.evaluate_repurposing_candidates(
             drug_mining_report, target_prioritization, target_analysis
         )
-        # Validate report was generated properly
-        if not repurposing_evaluation or not hasattr(repurposing_evaluation, 'markdown_report') or not repurposing_evaluation.markdown_report:
-            yield "Error: Failed to generate repurposing evaluation report."
-            return
         
         yield "Phase C: Generating final recommendations..."
         final_recommendations = await self.generate_final_recommendations(
@@ -249,32 +173,9 @@ class ResearchManager:
             network_model, target_analysis, disease_report, pharmacology_report,
             comprehensive_pathophysiology_report
         )
-        # Validate report was generated properly
-        if not final_recommendations or not hasattr(final_recommendations, 'markdown_report') or not final_recommendations.markdown_report:
-            yield "Error: Failed to generate final recommendations report."
-            return
         
         yield "Stage 4 complete. Final drug repurposing recommendations ready."
-        
-        # Build final report with all available content
-        report_sections = []
-        
-        if drug_mining_report and hasattr(drug_mining_report, 'markdown_report') and drug_mining_report.markdown_report:
-            report_sections.append(f"# Drug Mining Report\n\n{drug_mining_report.markdown_report}")
-        else:
-            report_sections.append("# Drug Mining Report\n\n*Report generation failed or content empty*")
-            
-        if repurposing_evaluation and hasattr(repurposing_evaluation, 'markdown_report') and repurposing_evaluation.markdown_report:
-            report_sections.append(f"# Repurposing Evaluation Report\n\n{repurposing_evaluation.markdown_report}")
-        else:
-            report_sections.append("# Repurposing Evaluation Report\n\n*Report generation failed or content empty*")
-            
-        if final_recommendations and hasattr(final_recommendations, 'markdown_report') and final_recommendations.markdown_report:
-            report_sections.append(f"# Final Recommendations\n\n{final_recommendations.markdown_report}")
-        else:
-            report_sections.append("# Final Recommendations\n\n*Report generation failed or content empty*")
-        
-        final_stage4_report = "\n\n---\n\n".join(report_sections)
+        final_stage4_report = f"{drug_mining_report.markdown_report}\n\n---\n\n{repurposing_evaluation.markdown_report}\n\n---\n\n{final_recommendations.markdown_report}"
         yield final_stage4_report
 
     async def run(self, query: str):
@@ -369,54 +270,21 @@ class ResearchManager:
 
     async def synthesize_disease_understanding(self, research_results: dict) -> DiseaseUnderstandingReport:
         """ Synthesize foundational research into a disease understanding report """
-        try:
-            input_data = f"Foundational Research Results: {research_results}"
-            result = await Runner.run(
-                disease_synthesis_agent,
-                input_data,
-            )
-            report = result.final_output_as(DiseaseUnderstandingReport)
-            
-            # Ensure markdown_report is populated
-            if not report.markdown_report:
-                print("Warning: LLM did not generate markdown_report. Creating fallback...")
-                report.markdown_report = f"""# Disease Understanding Report
-
-## Executive Summary
-{report.executive_summary}
-
-## Clinical Profile
-{report.clinical_profile}
-
-## Genetic Landscape
-{report.genetic_landscape}
-
-## Epidemiological Context
-{report.epidemiological_context}
-
-## Omics Insights
-{report.omics_insights}
-
-## Key Biological Factors
-{', '.join(report.key_biological_factors)}
-"""
-            return report
-        except Exception as e:
-            print(f"Error in disease understanding synthesis: {e}")
-            return None
+        input_data = f"Foundational Research Results: {research_results}"
+        result = await Runner.run(
+            disease_synthesis_agent,
+            input_data,
+        )
+        return result.final_output_as(DiseaseUnderstandingReport)
 
     async def analyze_pharmacology(self, disease_report: DiseaseUnderstandingReport) -> PharmacologyReport:
         """ Analyze pharmacological landscape based on disease understanding """
-        try:
-            input_data = f"Disease Report: {disease_report.markdown_report}\nKey Biological Factors: {disease_report.key_biological_factors}"
-            result = await Runner.run(
-                pharmacology_agent,
-                input_data,
-            )
-            return result.final_output_as(PharmacologyReport)
-        except Exception as e:
-            print(f"Error in pharmacology analysis: {e}")
-            return None
+        input_data = f"Disease Report: {disease_report.markdown_report}\nKey Biological Factors: {disease_report.key_biological_factors}"
+        result = await Runner.run(
+            pharmacology_agent,
+            input_data,
+        )
+        return result.final_output_as(PharmacologyReport)
 
     async def create_pathophysiology_plan(self, disease_report: DiseaseUnderstandingReport, pharmacology_report: PharmacologyReport) -> PathophysiologyResearchPlan:
         """ Create pathophysiology research plan based on disease understanding and pharmacology """

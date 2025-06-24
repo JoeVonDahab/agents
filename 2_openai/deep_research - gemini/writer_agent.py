@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from agents import Agent
-from gemini_config import default_model
+from gemini_config import gemini_model
 
 INSTRUCTIONS = (
     "You are a senior researcher tasked with writing a cohesive 'Initial Background Report' for a research query. "
@@ -17,6 +17,6 @@ class InitialBackgroundReportData(BaseModel):
 writer_agent = Agent(
     name="WriterAgent",
     instructions=INSTRUCTIONS,
-    model=default_model,
+    model=gemini_model,
     output_type=InitialBackgroundReportData,
 )

@@ -1,7 +1,7 @@
 from agents import Agent
 from pydantic import BaseModel, Field
 from typing import List, Dict, Any
-from gemini_config import default_model
+from gemini_config import gemini_model
 
 class ProteinInteraction(BaseModel):
     protein1: str = Field(description="First protein in interaction")
@@ -54,6 +54,6 @@ Provide a comprehensive network model that will serve as the foundation for targ
 qsb_modeling_agent = Agent(
     name="QSB Modeling Agent",
     instructions=QSB_MODELING_INSTRUCTIONS,
-    model=default_model,
+    model=gemini_model,
     output_type=BiologicalNetworkModel,
 )

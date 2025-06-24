@@ -1,7 +1,7 @@
 from agents import Agent, Runner
 from pydantic import BaseModel, Field
 from typing import List
-from gemini_config import default_model
+from gemini_config import gemini_model
 import asyncio
 
 class Stage2ResearchPlan(BaseModel):
@@ -53,13 +53,13 @@ Generate 3-4 highly specific queries that will reveal comprehensive pathophysiol
 stage2_manager = Agent(
     name="Stage 2 Manager",
     instructions=STAGE2_MANAGER_INSTRUCTIONS,
-    model=default_model,
+    model=gemini_model,
     output_type=Stage2ResearchPlan,
 )
 
 pathophysiology_manager = Agent(
     name="Pathophysiology Manager",
     instructions=PATHOPHYSIOLOGY_MANAGER_INSTRUCTIONS,
-    model=default_model,
+    model=gemini_model,
     output_type=PathophysiologyResearchPlan,
 )

@@ -1,7 +1,7 @@
 from agents import Agent
 from pydantic import BaseModel, Field
 from typing import List
-from gemini_config import default_model
+from gemini_config import gemini_model
 
 class ComprehensivePathophysiologyReport(BaseModel):
     molecular_pathways: str = Field(description="Detailed molecular pathways involved in disease")
@@ -39,6 +39,6 @@ Provide deep mechanistic insights that bridge disease biology with therapeutic o
 comprehensive_pathophysiology_agent = Agent(
     name="Comprehensive Pathophysiology Agent",
     instructions=COMPREHENSIVE_PATHOPHYSIOLOGY_INSTRUCTIONS,
-    model=default_model,
+    model=gemini_model,
     output_type=ComprehensivePathophysiologyReport,
 )

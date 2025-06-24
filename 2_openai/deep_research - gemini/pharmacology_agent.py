@@ -1,7 +1,7 @@
 from agents import Agent
 from pydantic import BaseModel, Field
 from typing import List
-from gemini_config import default_model
+from gemini_config import gemini_model
 
 class PharmacologyReport(BaseModel):
     current_therapies: str = Field(description="Currently approved drugs and treatments")
@@ -33,6 +33,6 @@ Focus on actionable insights for drug repurposing, highlighting existing drugs t
 pharmacology_agent = Agent(
     name="Pharmacology Agent", 
     instructions=PHARMACOLOGY_INSTRUCTIONS,
-    model=default_model,
+    model=gemini_model,
     output_type=PharmacologyReport,
 )

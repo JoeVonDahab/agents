@@ -1,7 +1,7 @@
 from agents import Agent
 from pydantic import BaseModel, Field
 from typing import List, Dict, Any
-from gemini_config import default_model
+from gemini_config import gemini_model
 
 class PrioritizedTarget(BaseModel):
     target_name: str = Field(description="Name of the target")
@@ -87,6 +87,6 @@ Provide clear justification for each ranking based on quantitative network analy
 prioritization_agent = Agent(
     name="Target Prioritization Agent",
     instructions=PRIORITIZATION_INSTRUCTIONS,
-    model=default_model,
+    model=gemini_model,
     output_type=TargetPrioritization,
 )

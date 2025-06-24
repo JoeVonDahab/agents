@@ -13,8 +13,8 @@ def test_imports():
         print("✅ dotenv imported successfully")
         
         print("\nTesting agent imports...")
-        from gemini_config import default_model, llama3_3_model
-        print("✅ Local Llama 3.3 config imported successfully")
+        from gemini_config import gemini_model
+        print("✅ Gemini config imported successfully")
         
         from research_manager import ResearchManager
         print("✅ Research manager imported successfully")

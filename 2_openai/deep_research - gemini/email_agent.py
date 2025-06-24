@@ -4,7 +4,7 @@ from typing import Dict
 import sendgrid
 from sendgrid.helpers.mail import Email, Mail, Content, To
 from agents import Agent, function_tool
-from gemini_config import default_model
+from gemini_config import gemini_model
 
 @function_tool
 def send_email(subject: str, html_body: str) -> Dict[str, str]:
@@ -26,5 +26,5 @@ email_agent = Agent(
     name="Email agent",
     instructions=INSTRUCTIONS,
     tools=[send_email],
-    model=default_model,
+    model=gemini_model,
 )

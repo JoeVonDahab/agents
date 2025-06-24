@@ -1,7 +1,7 @@
 from agents import Agent
 from pydantic import BaseModel, Field
 from typing import List, Dict, Any
-from gemini_config import default_model
+from gemini_config import gemini_model
 
 class DrugInteraction(BaseModel):
     drug_name: str = Field(description="Name of the drug")
@@ -77,6 +77,6 @@ Use search functionality extensively to gather comprehensive data. Focus on buil
 drug_miner_agent = Agent(
     name="Drug Miner Agent",
     instructions=DRUG_MINER_INSTRUCTIONS,
-    model=default_model,
+    model=gemini_model,
     output_type=DrugMiningReport,
 )

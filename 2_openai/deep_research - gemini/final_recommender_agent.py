@@ -1,7 +1,7 @@
 from agents import Agent
 from pydantic import BaseModel, Field
 from typing import List, Dict, Any
-from gemini_config import default_model
+from gemini_config import gemini_model
 
 class FinalRecommendation(BaseModel):
     drug_name: str = Field(description="Name of the recommended drug")
@@ -86,14 +86,12 @@ Quality Assurance:
 - Suggest additional research to strengthen recommendations
 - Identify potential failure modes and mitigation strategies
 
-IMPORTANT: You must populate ALL fields in the FinalRecommendationReport, especially the 'markdown_report' field with a comprehensive markdown-formatted report. The markdown_report should be a complete, well-formatted document that can be displayed to users with all your recommendations.
-
 Your final report should be actionable for pharmaceutical companies, academic researchers, or funding agencies considering drug repurposing investments.
 """
 
 final_recommender_agent = Agent(
     name="Final Recommender Agent",
     instructions=FINAL_RECOMMENDER_INSTRUCTIONS,
-    model=default_model,
+    model=gemini_model,
     output_type=FinalRecommendationReport,
 )

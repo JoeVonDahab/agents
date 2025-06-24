@@ -1,6 +1,6 @@
 from agents import Agent, function_tool
 from duckduckgo_search import DDGS
-from gemini_config import default_model
+from gemini_config import gemini_model
 
 @function_tool
 def web_search(query: str) -> str:
@@ -30,5 +30,5 @@ search_agent = Agent(
     name="Search agent",
     instructions=INSTRUCTIONS,
     tools=[web_search],
-    model=default_model,
+    model=gemini_model,
 )

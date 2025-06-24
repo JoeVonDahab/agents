@@ -1,7 +1,7 @@
 from agents import Agent
 from pydantic import BaseModel, Field
 from typing import List
-from gemini_config import default_model
+from gemini_config import gemini_model
 
 class DiseaseUnderstandingReport(BaseModel):
     executive_summary: str = Field(description="High-level summary of disease foundations")
@@ -28,14 +28,12 @@ Your task is to synthesize this foundational information into a comprehensive di
 - Identifies key biological factors that drive the disease
 - Sets the stage for deeper pathophysiological analysis
 
-IMPORTANT: You must populate ALL fields in the DiseaseUnderstandingReport, especially the 'markdown_report' field with a comprehensive markdown-formatted report. The markdown_report should be a complete, well-formatted document that can be displayed to users.
-
 The report should establish a strong foundational understanding that will inform subsequent pathophysiological and pharmacological analysis.
 """
 
 disease_synthesis_agent = Agent(
     name="Disease Understanding Synthesis Agent",
     instructions=DISEASE_SYNTHESIS_INSTRUCTIONS,
-    model=default_model,
+    model=gemini_model,
     output_type=DiseaseUnderstandingReport,
 )

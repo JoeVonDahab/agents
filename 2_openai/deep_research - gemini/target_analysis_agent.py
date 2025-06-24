@@ -1,7 +1,7 @@
 from agents import Agent
 from pydantic import BaseModel, Field
 from typing import List, Dict, Any
-from gemini_config import default_model
+from gemini_config import gemini_model
 
 class TargetAssessment(BaseModel):
     target_name: str = Field(description="Name of the target")
@@ -80,6 +80,6 @@ Use search functionality to fill any missing information gaps. Provide comprehen
 target_analysis_agent = Agent(
     name="Target Analysis Agent", 
     instructions=TARGET_ANALYSIS_INSTRUCTIONS,
-    model=default_model,
+    model=gemini_model,
     output_type=TargetAnalysisReport,
 )

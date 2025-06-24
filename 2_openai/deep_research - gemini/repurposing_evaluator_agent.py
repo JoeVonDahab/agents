@@ -1,7 +1,7 @@
 from agents import Agent
 from pydantic import BaseModel, Field
 from typing import List, Dict, Any
-from gemini_config import default_model
+from gemini_config import gemini_model
 
 class RepurposingCandidate(BaseModel):
     drug_name: str = Field(description="Name of the candidate drug")
@@ -75,6 +75,6 @@ Provide comprehensive candidate rankings with clear justification for each scori
 repurposing_evaluator_agent = Agent(
     name="Repurposing Evaluator Agent",
     instructions=REPURPOSING_EVALUATOR_INSTRUCTIONS,
-    model=default_model,
+    model=gemini_model,
     output_type=RepurposingEvaluationReport,
 )
